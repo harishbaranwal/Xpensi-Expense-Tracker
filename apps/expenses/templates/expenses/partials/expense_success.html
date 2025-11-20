@@ -1,0 +1,41 @@
+<!-- Success message that replaces the modal -->
+<div id="success-message" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+    <!-- Success icon -->
+        <div class="flex items-center justify-center w-16 h-16 mx-auto bg-green-100 rounded-full mb-4">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+        
+    <!-- Message -->
+        <div class="text-center">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                ✅ {{ message }}
+            </h3>
+            <p class="text-gray-600 mb-4">
+                Expense of <strong>₹{{ expense.amount }}</strong> in <strong>{{ expense.category.name }}</strong>
+            </p>
+        </div>
+        
+    <!-- Button to close -->
+        <div class="text-center">
+            <button hx-get="/close-modal" 
+                    hx-target="#success-message" 
+                    hx-swap="outerHTML"
+                    hx-trigger="click, load delay:2s"
+                    class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                Continue
+            </button>
+        </div>
+        
+    <!-- Auto-close after 3 seconds -->
+        <script>
+            setTimeout(function() {
+                document.getElementById('success-message').remove();
+                // Opcional: Recargar la lista de gastos
+                htmx.trigger('#expense-results', 'refresh');
+            }, 3000);
+        </script>
+    </div>
+</div> 

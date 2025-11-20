@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - xpensi{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Dashboard Header -->
+    <div class="bg-white rounded-lg shadow-sm p-4 md:p-6">
+    <!-- Main Title -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+            <div class="mb-3 sm:mb-0">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 flex items-center">
+                   Expense Dashboard
+                </h1>
+                <p class="text-gray-600 mt-1 text-sm md:text-base">Summary of your small expenses</p>
+            </div>
+            
+            <!-- Monthly total (desktop only) -->
+            <div class="hidden sm:block text-right">
+                <p class="text-sm text-gray-500">Current month</p>
+                <p class="text-2xl font-bold text-green-600">₹{{ monthly_total|floatformat:2 }}</p>
+            </div>
+        </div>
+        
+    <!-- Action buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:justify-end">
+                <button hx-get="{% url 'expenses:add_expense' %}" 
+                    hx-target="#modal-container" 
+                    hx-indicator="#modal-loading"
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                <i class="fa-solid fa-plus mr-2"></i> Add Expense
+            </button>
+            <button hx-get="{% url 'expenses:manage_budget' %}" 
+                    hx-target="#modal-container" 
+                    hx-indicator="#modal-loading"
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
+                <i class="fa-solid fa-wallet mr-2"></i> Budget
+            </button>
+        </div>
+        
+    <!-- Monthly total (mobile only) -->
+        <div class="sm:hidden mt-4 pt-4 border-t border-gray-200 text-center">
+            <p class="text-sm text-gray-500">Current month</p>
+            <p class="text-2xl font-bold text-green-600">₹{{ monthly_total|floatformat:2 }}</p>
+        </div>
+    </div>
+
+    <!-- Dashboard Filters -->
+    <div class="bg-white rounded-lg shadow-sm p-4" x-data="{ selectedPeriod: '{{ selected_period|default:'current_month' }}' }">
+        <div class="flex items-center justify-between">
+            <h3 class="text-lg font-medium text-gray-900"><i class="fa-solid fa-chart-simple mr-2"></i> Filter metrics</h3>
+            <form id="dashboard-filter" 
+                  hx-get="{% url 'expenses:dashboard' %}"
+                  hx-target="#dashboard-metrics"
+                  hx-trigger="change"
+                  hx-indicator="#metrics-loading">
+                <select name="period" 
+                        class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        x-model="selectedPeriod">
+                    <option value="current_month" {% if selected_period == 'current_month' %}selected{% endif %}>This month</option>
+                    <option value="last_month" {% if selected_period == 'last_month' %}selected{% endif %}>Last month</option>
+                    <option value="last_7_days" {% if selected_period == 'last_7_days' %}selected{% endif %}>Last 7 days</option>
+                    <option value="last_30_days" {% if selected_period == 'last_30_days' %}selected{% endif %}>Last 30 days</option>
+                    <option value="current_year" {% if selected_period == 'current_year' %}selected{% endif %}>This year</option>
+                </select>
+            </form>
+        </div>
+        
+    <!-- Metrics loading indicator -->
+        <div id="metrics-loading" class="htmx-indicator mt-2 text-center">
+            <div class="inline-flex items-center px-3 py-1 bg-blue-50 border border-blue-200 rounded-lg">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-blue-700 text-sm">Updating metrics...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Status -->
+    {% if has_budget %}
+        <div class="bg-white rounded-lg shadow-sm p-4 border {{ budget_color_class }}">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl">{{ budget_icon }}</span>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Budget Status</h3>
+                        <p class="text-sm">{{ budget_message }}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-2xl font-bold">{{ budget_percentage_used|floatformat:0 }}%</p>
+                    <p class="text-sm text-gray-500">of ₹{{ budget.monthly_limit|floatformat:2 }}</p>
+                </div>
+            </div>
+            <!-- Simple progress bar -->
+            <div class="mt-3 w-full bg-gray-200 rounded-full h-2">
+                <div class="{% if budget_status == 'safe' %}bg-green-500{% elif budget_status == 'warning' %}bg-yellow-500{% else %}bg-red-500{% endif %} h-2 rounded-full transition-all duration-300" 
+                     style="width: {{ budget_percentage_used|floatformat:0 }}%">
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-lightbulb text-2xl text-yellow-400"></i>
+                <div class="flex-1">
+                    <h3 class="text-sm font-medium text-blue-800">Want to better control your expenses?</h3>
+                    <p class="text-sm text-blue-600">Set a monthly budget and receive automatic alerts</p>
+                </div>
+                <button hx-get="{% url 'expenses:manage_budget' %}" 
+                        hx-target="#modal-container" 
+                        hx-indicator="#modal-loading"
+                        class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                    Set up
+                </button>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Main Metrics -->
+    <div id="dashboard-metrics"
+         hx-get="{% url 'expenses:dashboard' %}"
+         hx-trigger="refreshDashboard from:body"
+         hx-swap="innerHTML">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Period Total -->
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-sm p-6 text-white">
+                <div class="flex items-center">
+                        <div class="p-3 bg-white bg-opacity-20 rounded-lg">
+                            <i class="fa-solid fa-coins text-2xl"></i>
+                        </div>
+                    <div class="ml-4">
+                        <p class="text-blue-100">{{ period_label|default:"Month Total" }}</p>
+                        <p class="text-2xl font-bold">₹{{ period_total|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Expenses for the Period -->
+            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-sm p-6 text-white">
+                <div class="flex items-center">
+                    <div class="p-3 bg-white bg-opacity-20 rounded-lg">
+                        <i class="fa-solid fa-chart-pie text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-green-100">Expenses ({{ period_label|default:"This Month" }})</p>
+                        <p class="text-2xl font-bold">{{ period_expenses_count }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Average -->
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-sm p-6 text-white">
+                <div class="flex items-center">
+                    <div class="p-3 bg-white bg-opacity-20 rounded-lg">
+                        <i class="fa-solid fa-chart-line text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-purple-100">Daily Average</p>
+                        <p class="text-2xl font-bold">₹{{ period_avg_daily|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Doughnut Chart - Expenses by Category -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                 Expenses by Category ({{ period_label|default:"This month" }})
+            </h2>
+            {% if categories_summary %}
+                <div class="h-80">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            {% else %}
+                <div class="h-80 flex items-center justify-center text-gray-500">
+                    <div class="text-center">
+                     <i class="fa-solid fa-box-open text-6xl mb-4 block text-gray-400"></i>
+                        <p>No expenses in {{ period_label|default:"this month"|lower }}</p>
+                        <button hx-get="{% url 'expenses:add_expense' %}" 
+                                hx-target="#modal-container" 
+                                hx-indicator="#modal-loading"
+                                class="text-blue-600 hover:text-blue-800">
+                            Add your first expense!
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+    <!-- Line Chart - Expense Trend -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                 Expense Trend ({{ period_label|default:"This month" }})
+            </h2>
+            {% if chart_dates_json != "[]" %}
+                <div class="h-80">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            {% else %}
+                <div class="h-80 flex items-center justify-center text-gray-500">
+                    <div class="text-center">
+                        <i class="fa-solid fa-chart-line text-6xl mb-4 block text-gray-400"></i>
+                        <p>Not enough data</p>
+                        <p class="text-sm">Add more expenses to see the trend</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Expenses -->
+    <div class="bg-white rounded-lg shadow-sm p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <i class="fa-solid fa-clock mr-2 text-lg text-gray-600"></i> Recent Expenses
+        </h2>
+        
+        {% if recent_expenses %}
+            <!-- Vista de tabla para desktop -->
+            <div class="hidden md:block overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Description
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Category
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Amount
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for expense in recent_expenses %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ expense.description }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" 
+                                      style="background-color: {{ expense.category.color }}20; color: {{ expense.category.color }};">
+                                    {{ expense.category.name }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ expense.date|date:"d/m/Y" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                ₹{{ expense.amount|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Card view for mobile -->
+            <div class="md:hidden space-y-4">
+                {% for expense in recent_expenses %}
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-medium text-gray-900 text-sm">{{ expense.description }}</h4>
+                        <span class="text-lg font-bold text-gray-900">₹{{ expense.amount|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <div class="flex items-center space-x-2">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" 
+                                  style="background-color: {{ expense.category.color }}20; color: {{ expense.category.color }};">
+                                {{ expense.category.name }}
+                            </span>
+                        </div>
+                        <span class="text-gray-500">{{ expense.date|date:"d/m/Y" }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Responsive action buttons -->
+            <div class="mt-4 flex flex-col sm:flex-row sm:justify-center gap-3 sm:gap-2">
+                <a href="{% url 'expenses:expense_list' %}" 
+                   class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200 transition-colors">
+
+                    <i class="fa-solid fa-table-list" style="margin-right:10px;"></i> View all expenses
+                </a>
+                <a href="{% url 'expenses:expense_list' %}#filters" 
+                   class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-green-600 bg-green-100 hover:bg-green-200 transition-colors">
+                   <i class="fa-solid fa-filter" style="margin-right:10px;"></i> Filter expenses
+                </a>
+            </div>
+        {% else %}
+                <div class="text-center py-12">
+               <i class="fa-solid fa-box-open text-6xl mb-4 block text-gray-400"></i>
+
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No expenses recorded</h3>
+                <p class="text-gray-500 mb-4">Start tracking your small expenses!</p>
+                <button hx-get="{% url 'expenses:add_expense' %}" 
+                        hx-target="#modal-container" 
+                        hx-indicator="#modal-loading"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                    Add first expense
+                </button>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script>
+// Inicializar gráficos con datos del servidor
+document.addEventListener('DOMContentLoaded', function() {
+    initDashboardCharts({
+        categories: {{ chart_categories_json|safe }},
+        amounts: {{ chart_amounts_json|safe }},
+        colors: {{ chart_colors_json|safe }},
+        dates: {{ chart_dates_json|safe }},
+        dailyAmounts: {{ chart_daily_amounts_json|safe }}
+    });
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,331 @@
+<!-- Success message if exists -->
+{% if delete_success %}
+<div class="bg-green-50 border-l-4 border-green-400 p-4 mb-4 rounded-lg transition-all duration-300"
+     hx-get="{% url 'expenses:close_modal' %}"
+     hx-target="this"
+     hx-swap="outerHTML"
+     hx-trigger="load delay:4s">
+    <div class="flex justify-between items-start">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-green-700">
+                    <strong> {{ delete_message }}</strong><br>
+                    ₹{{ expense_data.amount }} - {{ expense_data.category_name }}
+                    {% if expense_data.description %}
+                        - "{{ expense_data.description }}"
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    <!-- Button to close manually -->
+        <button type="button" 
+                class="text-green-400 hover:text-green-600 ml-4"
+                hx-get="{% url 'expenses:close_modal' %}"
+                hx-target="closest div"
+                hx-swap="outerHTML">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
+</div>
+{% endif %}
+
+{% if edit_success %}
+<div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4 rounded-lg transition-all duration-300"
+     hx-get="{% url 'expenses:close_modal' %}"
+     hx-target="this"
+     hx-swap="outerHTML"
+     hx-trigger="load delay:4s">
+    <div class="flex justify-between items-start">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-blue-700">
+                    <strong> {{ edit_message }}</strong><br>
+                    ₹{{ expense_data.amount }} - {{ expense_data.category_name }}
+                    {% if expense_data.description %}
+                        - "{{ expense_data.description }}"
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    <!-- Button to close manually -->
+        <button type="button" 
+                class="text-blue-400 hover:text-blue-600 ml-4"
+                hx-get="{% url 'expenses:close_modal' %}"
+                hx-target="closest div"
+                hx-swap="outerHTML">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<!-- Active Period Information -->
+{% if active_period_info %}
+<div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6">
+    <div class="flex items-center space-x-3">
+        <div class="text-indigo-600">
+            
+            <i class="fa-solid fa-calendar-days mr-2"></i>
+        </div>
+        <div>
+            <h3 class="text-lg font-semibold text-indigo-900">{{ active_period_info }}</h3>
+            {% if period_dates %}
+            <p class="text-sm text-indigo-700">
+                 From {{ period_dates.0|date:"d/m/Y" }} to {{ period_dates.1|date:"d/m/Y" }}
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Filter Statistics -->
+{% if has_filters %}
+<div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center">
+    
+            <div class="text-blue-600 mr-3">
+  <i class="fa-solid fa-filter"></i>
+</div>
+            <div>
+                <p class="text-blue-800 font-medium">Filtered Results</p>
+                <p class="text-blue-600 text-sm">
+                    Showing {{ count_filtered }} expense{{ count_filtered|pluralize }} 
+                    for a total of ₹{{ total_filtered|floatformat:2 }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Lista de gastos -->
+<div class="bg-white rounded-lg shadow">
+    {% if expenses %}
+    
+    <!-- Desktop View: Table -->
+    <div class="hidden md:block overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Date
+</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Category
+</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Description
+</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Place
+</th>
+<th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Amount
+</th>
+<th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Actions
+</th>
+
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for expense in expenses %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ expense.date|date:"d/m/Y" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-full mr-2" style="background-color: {{ expense.category.color }}"></div>
+                                <span class="text-sm text-gray-900">{{ expense.category.name }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                            {% if expense.description %}
+                                {{ expense.description }}
+                            {% else %}
+                                <span class="text-gray-400 italic">Sin descripción</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                            {% if expense.location %}
+                                {{ expense.location }}
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-gray-900">
+                            ₹{{ expense.amount|floatformat:2 }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
+                            <div class="flex justify-center space-x-1">
+                                <!-- Botón Editar -->
+                                <button hx-get="{% url 'expenses:edit_expense' expense.id %}" 
+                                        hx-target="#modal-container"
+                                        hx-indicator="#edit-loading"
+                                        class="text-blue-600 hover:text-blue-900 hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                                        title="Editar gasto">
+                                    <i class="fa-solid fa-pen-to-square" style="margin-right:10px;"></i> 
+                                </button>
+                                
+                                <!-- Botón Eliminar -->
+                                <button hx-delete="{% url 'expenses:delete_expense' expense.id %}" 
+                                        hx-target="#expense-results"
+                                  hx-confirm="Are you sure you want to delete this expense of ₹{{ expense.amount }}?"
+
+                                        hx-indicator="#delete-loading"
+                                        class="text-red-600 hover:text-red-900 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                                        title="Eliminar gasto">
+                                    <i class="fa-solid fa-trash" style="margin-right:10px;"></i>    
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Mobile View: Cards -->
+    <div class="md:hidden divide-y divide-gray-200">
+        {% for expense in expenses %}
+        <div class="p-4 hover:bg-gray-50 transition-colors">
+            <!-- Card header -->
+            <div class="flex justify-between items-start mb-3">
+                <div class="flex items-center space-x-2">
+                    <div class="w-4 h-4 rounded-full" style="background-color: {{ expense.category.color }}"></div>
+                    <span class="font-medium text-gray-900">{{ expense.category.name }}</span>
+                </div>
+                <div class="text-right">
+                    <div class="text-lg font-bold text-gray-900">₹{{ expense.amount|floatformat:2 }}</div>
+                    <div class="text-xs text-gray-500">{{ expense.date|date:"d/m/Y" }}</div>
+                </div>
+            </div>
+            
+            <!-- Card content -->
+            <div class="space-y-2 mb-3">
+                {% if expense.description %}
+                <div class="flex items-start space-x-2">
+                    <svg class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+                    </svg>
+                    <span class="text-sm text-gray-700">{{ expense.description }}</span>
+                </div>
+                {% endif %}
+                
+                {% if expense.location %}
+                <div class="flex items-start space-x-2">
+                    <svg class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span class="text-sm text-gray-500">{{ expense.location }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Actions -->
+            <div class="flex justify-end space-x-2">
+                <!-- Edit Button -->
+                <button hx-get="{% url 'expenses:edit_expense' expense.id %}" 
+                        hx-target="#modal-container"
+                        hx-indicator="#edit-loading"
+                        class="flex items-center space-x-1 text-blue-600 hover:text-blue-900 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
+                        title="Edit expense">
+          
+                    <span class="text-xs">Edit</span>
+                </button>
+                
+                <!-- Delete Button -->
+                <button hx-delete="{% url 'expenses:delete_expense' expense.id %}" 
+                        hx-target="#expense-results"
+                        hx-confirm="Are you sure you want to delete this expense of ₹{{ expense.amount }}?"
+                        hx-indicator="#delete-loading"
+                        class="flex items-center space-x-1 text-red-600 hover:text-red-900 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors"
+                        title="Delete expense">
+                   
+                    <span class="text-xs">Delete</span>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Total expenses -->
+    <div class="bg-gray-50 px-4 md:px-6 py-3 border-t border-gray-200">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
+            <span class="text-sm text-gray-600">
+                {% if has_filters %}
+                    Showing {{ count_filtered }} of {{ expenses|length }} expense{{ expenses|length|pluralize }}
+                {% else %}
+                    Total of {{ expenses|length }} expense{{ expenses|length|pluralize }}
+                {% endif %}
+            </span>
+            <div class="flex items-center justify-between sm:justify-end">
+                <span class="text-sm text-gray-500 sm:hidden mr-2">Total:</span>
+                <span class="text-lg font-bold text-gray-900">
+                    ₹{{ total_filtered|floatformat:2 }}
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Empty state -->
+    <div class="text-center py-12">
+        {% if has_filters %}
+          <div class="text-6xl mb-4">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</div>
+
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No expenses found</h3>
+            <p class="text-gray-500 mb-6">
+                The applied filters returned no results.<br>
+                Try adjusting your search criteria.
+            </p>
+            <button hx-get="{% url 'expenses:expense_list' %}" 
+                    hx-target="#expense-results"
+                    hx-indicator="#loading-indicator"
+                    class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                <i class="fa-solid fa-rotate-right" style="margin-right:10px;"></i>
+View all expenses
+
+
+            </button>
+        {% else %}
+           
+            <div class="text-6xl mb-4">
+         <i class="fa-solid fa-box-open text-6xl mb-4 block text-gray-400"></i>
+
+</div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">You have no recorded expenses</h3>
+            <p class="text-gray-500 mb-6">Start by recording your first small expense</p>
+            <button hx-get="{% url 'expenses:add_expense' %}" 
+                    hx-target="#modal-container" 
+                    hx-indicator="#modal-loading"
+                    class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+           <i class="fa-solid fa-plus" style="margin-right:10px;"></i>
+Add your first expense
+            </button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div> 

@@ -1,0 +1,21 @@
+<!-- Success message for edit -->
+<div 
+    id="edit-success-message" 
+    class="fixed top-4 right-4 z-50 max-w-sm p-4 bg-green-500 text-white rounded-lg shadow-lg transform transition-all duration-300 ease-in-out"
+    hx-get="{% url 'expenses:close_modal' %}"
+    hx-target="#edit-success-message"
+    hx-swap="outerHTML"
+    hx-trigger="load delay:3s"
+>
+    <div class="flex items-center">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <div>
+            <p class="font-medium">Expense updated!</p>
+            <p class="text-sm opacity-90">
+                ₹{{ expense_data.amount }} - {{ expense_data.category_name }}
+            </p>
+        </div>
+    </div>
+</div> 

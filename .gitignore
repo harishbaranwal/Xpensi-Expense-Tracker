@@ -1,0 +1,195 @@
+# ==================================
+# GITIGNORE FOR DJANGO PROJECTS
+# ==================================
+
+# ==========================================
+# 1. PYTHON FILES
+# ==========================================
+# Compiled Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distributions / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ==========================================
+# 2. VIRTUAL ENVIRONMENTS
+# ==========================================
+# Python virtual environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# ==========================================
+# 3. DJANGO SPECIFIC
+# ==========================================
+# SQLite database (development)
+*.sqlite3
+*.db
+
+# Local migration files (optional)
+# Uncomment the following line if you want to ignore migrations
+# */migrations/*.py
+# !*/migrations/__init__.py
+
+# User-uploaded media files
+media/
+
+# Collected static files (production only)
+staticfiles/
+
+# Note: static/ is NOT ignored because it contains development source files
+
+# Local configuration files
+local_settings.py
+settings_local.py
+
+# ==========================================
+# 4. ENVIRONMENT VARIABLES & CONFIGURATION
+# ==========================================
+# Environment variable files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Sensitive configuration files
+secrets.json
+config.json
+
+# ==========================================
+# 5. LOGS & TEMPORARY FILES
+# ==========================================
+# Log files
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# ==========================================
+# 6. EDITORS & IDEs
+# ==========================================
+# Visual Studio Code
+.vscode/
+.history/
+
+# Cursor
+.cursor/
+
+# PyCharm
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# ==========================================
+# 7. OPERATING SYSTEM
+# ==========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ==========================================
+# 8. DEVELOPMENT TOOLS
+# ==========================================
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Node.js (if using frontend with Node)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==========================================
+# 9. BACKUP FILES
+# ==========================================
+# Automatic backups
+*.bak
+*.backup
+*.old
+
+# ==========================================
+# 10. CERTIFICATES & KEYS
+# ==========================================
+# SSL Certificates
+*.pem
+*.key
+*.crt
+
+# SSH Keys
+id_rsa
+id_rsa.pub
+
+# Docker
+.docker/
+
+# SQL
+*.sql
+backup_*.sql

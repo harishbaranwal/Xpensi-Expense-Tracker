@@ -1,0 +1,124 @@
+<!-- Add Expense Modal -->
+<div id="expense-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-screen overflow-y-auto">
+    <!-- Modal Header -->
+        <div class="bg-blue-600 text-white px-6 py-4 rounded-t-lg">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold flex items-center">
+                    <i class="fa-solid fa-square-plus text-white-600" style="margin-right:10px"></i> Add New Expense
+
+                </h3>
+                <button hx-get="{% url 'expenses:close_modal' %}" 
+                        hx-target="#modal-container" 
+                        hx-swap="innerHTML"
+                        class="text-white hover:text-gray-200 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+    <!-- Modal Content -->
+        <div class="p-6">
+            <form hx-post="{% url 'expenses:add_expense' %}" 
+                  hx-target="#modal-container" 
+                  hx-swap="innerHTML"
+                  hx-indicator="#modal-loading">
+                {% csrf_token %}
+                
+                <!-- Loading indicator -->
+                <div id="modal-loading" class="htmx-indicator">
+                    <div class="flex items-center justify-center py-4">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <span class="ml-2 text-gray-600">Saving...</span>
+                    </div>
+                </div>
+
+                <!-- Form fields -->
+                <div class="space-y-4">
+                    <!-- Category -->
+                    <div>
+                        <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.category.label }}
+                        </label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="text-red-600 text-sm mt-1">
+                                {{ form.category.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Amount -->
+                    <div>
+                        <label for="{{ form.amount.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.amount.label }}
+                        </label>
+                        {{ form.amount }}
+                        {% if form.amount.errors %}
+                            <div class="text-red-600 text-sm mt-1">
+                                {{ form.amount.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.description.label }}
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-red-600 text-sm mt-1">
+                                {{ form.description.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Location -->
+                    <div>
+                        <label for="{{ form.location.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.location.label }}
+                        </label>
+                        {{ form.location }}
+                        {% if form.location.errors %}
+                            <div class="text-red-600 text-sm mt-1">
+                                {{ form.location.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Date -->
+                    <div>
+                        <label for="{{ form.date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.date.label }}
+                        </label>
+                        {{ form.date }}
+                        {% if form.date.errors %}
+                            <div class="text-red-600 text-sm mt-1">
+                                {{ form.date.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Modal Buttons -->
+                <div class="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                    <button type="button" 
+                            hx-get="{% url 'expenses:close_modal' %}" 
+                            hx-target="#modal-container" 
+                            hx-swap="innerHTML"
+                            class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fa-solid fa-floppy-disk text-white-600"  style="margin-right:10px"></i> Save Expense
+
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 

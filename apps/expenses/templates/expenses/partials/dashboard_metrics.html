@@ -1,0 +1,40 @@
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Period Total -->
+    <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-sm p-6 text-white">
+        <div class="flex items-center">
+            <div class="p-3 bg-white bg-opacity-20 rounded-lg">
+                <span class="text-2xl"></span>
+            </div>
+            <div class="ml-4">
+                <p class="text-blue-100">{{ period_label|default:"Month Total" }}</p>
+                <p class="text-2xl font-bold">₹{{ period_total|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Expenses for the Period -->
+    <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-sm p-6 text-white">
+        <div class="flex items-center">
+            <div class="p-3 bg-white bg-opacity-20 rounded-lg">
+                <span class="text-2xl"></span>
+            </div>
+            <div class="ml-4">
+                <p class="text-green-100">Expenses ({{ period_label|default:"This Month" }})</p>
+                <p class="text-2xl font-bold">{{ period_expenses_count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Average -->
+    <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-sm p-6 text-white">
+        <div class="flex items-center">
+            <div class="p-3 bg-white bg-opacity-20 rounded-lg">
+                <span class="text-2xl"></span>
+            </div>
+            <div class="ml-4">
+                <p class="text-purple-100">Daily Average</p>
+                <p class="text-2xl font-bold">₹{{ period_avg_daily|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div>
+</div> 

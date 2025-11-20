@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}All Expenses - xpensi{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/custom.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900">All Expenses</h1>
+                    <p class="text-gray-600 text-sm md:text-base">Complete history of your small expenses</p>
+                </div>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                    <a href="{% url 'expenses:dashboard' %}" 
+                       class="text-center sm:text-left text-gray-600 hover:text-gray-800 transition-colors py-2 sm:py-0">
+                        ← Dashboard
+                    </a>
+                    <button hx-get="{% url 'expenses:add_expense' %}" 
+                            hx-target="#modal-container" 
+                            hx-indicator="#modal-loading"
+                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-center">
+                         <i class="fa-solid fa-plus"></i>  Add Expense
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Filters -->
+    <div id="filters" class="bg-white rounded-lg shadow p-4 md:p-6" x-data="{ showCustomDates: false }">
+        <div class="mb-4">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2"><i class="fa-solid fa-magnifying-glass" style="margin-right:10px;"></i>
+ Advanced Filters</h2>
+            <p class="text-sm text-gray-600">Filter your expenses by category, date, and amount</p>
+        </div>
+        
+        <form id="filter-form" method="GET" class="space-y-4"
+              hx-get="{% url 'expenses:expense_list' %}"
+              hx-target="#expense-results"
+              hx-trigger="change from:select, change from:input, submit"
+              hx-indicator="#loading-indicator"
+              onsubmit="return false;"
+              @change="if ($event.target.name === 'period') { showCustomDates = $event.target.value === 'custom' }">
+            <!-- First row: Period and Category -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Quick filter by Period -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        {{ filter_form.period.label }}
+                    </label>
+                    {{ filter_form.period }}
+                    {% if filter_form.period.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ filter_form.period.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Filter by Category -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        {{ filter_form.category.label }}
+                    </label>
+                    {{ filter_form.category }}
+                    {% if filter_form.category.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ filter_form.category.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Second row: Custom dates (hidden by default) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-show="showCustomDates" x-transition>
+                <!-- Filter From Date -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        {{ filter_form.date_from.label }}
+                    </label>
+                    {{ filter_form.date_from }}
+                    {% if filter_form.date_from.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ filter_form.date_from.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Filter To Date -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        {{ filter_form.date_to.label }}
+                    </label>
+                    {{ filter_form.date_to }}
+                    {% if filter_form.date_to.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ filter_form.date_to.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Third row: Amount filters -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Min Amount Filter -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        {{ filter_form.min_amount.label }}
+                    </label>
+                    {{ filter_form.min_amount }}
+                    {% if filter_form.min_amount.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ filter_form.min_amount.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Max Amount Filter -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        {{ filter_form.max_amount.label }}
+                    </label>
+                    {{ filter_form.max_amount }}
+                    {% if filter_form.max_amount.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ filter_form.max_amount.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Form errors -->
+            {% if filter_form.non_field_errors %}
+                <div class="bg-red-50 border border-red-200 rounded-md p-4">
+                    {% for error in filter_form.non_field_errors %}
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Action buttons -->
+            <div class="flex flex-wrap gap-3">
+                <button type="submit" 
+                        class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fa-solid fa-magnifying-glass" style="margin-right:10px;"></i>  Apply Filters
+                </button>
+                <button type="button" id="reset-filters"
+                        onclick="document.getElementById('filter-form').reset(); htmx.trigger('#filter-form', 'submit')"
+                        class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+ <i class="fa-solid fa-rotate-right" style="margin-right:10px;"></i> Clear Filters
+                </button>
+            </div>
+            
+            <!-- HTMX loading indicator -->
+            <div id="loading-indicator" class="htmx-indicator text-center mt-4">
+                <div class="inline-flex items-center px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-blue-700">Updating results...</span>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Delete loading indicator -->
+    <div id="delete-loading" class="htmx-indicator bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+        <div class="flex items-center">
+            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-yellow-600 mr-3"></div>
+            <span class="text-yellow-800 font-medium"><i class="fa-solid fa-trash" style="margin-right:10px;"></i> Deleting expense...</span>
+        </div>
+    </div>
+
+    <!-- Results container to be updated by HTMX -->
+    <div id="expense-results" 
+         hx-get="{% url 'expenses:expense_list' %}"
+         hx-trigger="refreshExpenseList from:body"
+         hx-swap="innerHTML">
+        {% include 'expenses/partials/expense_list_content.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Listen for event to close edit modal
+    document.body.addEventListener('closeEditModal', function() {
+        const modal = document.getElementById('edit-modal');
+        if (modal) {
+            modal.remove();
+        }
+    });
+</script>
+{% endblock %} 

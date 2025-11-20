@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - xpensi{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <!-- Logo and title -->
+            <div class="flex justify-center">
+              
+<span class="text-6xl">
+  <i class="fa-solid fa-right-to-bracket text-blue-500"></i>
+</span>
+
+
+            </div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Login
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Access your expense tracker
+            </p>
+        </div>
+        
+    <!-- Login form -->
+        <form class="mt-8 space-y-6" method="post">
+            {% csrf_token %}
+            
+            <!-- Show errors if any -->
+            {% if form.errors %}
+                <div class="bg-red-50 border border-red-200 rounded-md p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <span class="text-red-400"><i class="	fa-solid fa-triangle-exclamation text-red-400"></i>
+</span>
+                            
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">
+                                Login error
+                            </h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                <ul>
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="space-y-4">
+                <!-- Username field -->
+                <div>
+                    <label for="id_username" class="block text-sm font-medium text-gray-700">
+                        Username
+                    </label>
+                    <div class="mt-1">
+                        <input 
+                            id="id_username" 
+                            name="username" 
+                            type="text" 
+                            required 
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                            placeholder="Username"
+                            value="{% if form.username.value %}{{ form.username.value }}{% endif %}"
+                        >
+                    </div>
+                </div>
+                
+                <!-- Password field -->
+                <div>
+                    <label for="id_password" class="block text-sm font-medium text-gray-700">
+                        Password
+                    </label>
+                    <div class="mt-1">
+                        <input 
+                            id="id_password" 
+                            name="password" 
+                            type="password" 
+                            required 
+                            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                            placeholder="Password"
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden next field (for redirect after login) -->
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            <!-- Submit button -->
+            <div>
+                <button 
+                    type="submit" 
+                    class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                >
+                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <span class="h-5 w-5 text-green-500 group-hover:text-green-400">
+                         
+                        </span>
+                    </span>
+                    Login
+                </button>
+            </div>
+            
+            <!-- Additional information -->
+            <div class="text-center">
+                <p class="text-xs text-gray-500">
+                    Trouble logging in? Contact the administrator
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 
